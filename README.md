@@ -12,6 +12,7 @@ Supported language: Japanese, English
 
 # Usage
 - ディレクトリの作成、データセットのダウンロード
+
   cd munoh2
   mkdir data model
 
@@ -20,18 +21,23 @@ Supported language: Japanese, English
   python bin/moviediag2conv.py
 
 - データセットの前処理，辞書の作成
+
   bin/preprocess.sh
 
 - Word2Vec の学習 (not mandatory)
+
   bin/word2vec.sh
 
 - チャットボットの事前学習 (not mandatory)
+
   bin/pretrain.sh
 
 - チャットボットの学習
+
   bin/train.sh
   bin/train+premodel.sh (using pre-trained model)
 
 - テスト
+
   bin/test.sh
   bin/talkwith.sh (interactive mode)
