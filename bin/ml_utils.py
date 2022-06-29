@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# last updated:<2022/02/01/Tue 11:48:16 from:tuttle-desktop>
+# last updated:<2022/06/29/Wed 17:45:09 from:tuttle-desktop>
 
 import re
 import torch
@@ -37,13 +37,43 @@ def plot_graph(x, ys, opts, path):    # opts = [(label, color), ...]
     plt.grid()
     plt.savefig(path)
 
+import numpy as np
+import seaborn as sns
+import pandas as pd
+def plot_heatmap(heatmap, x, y):
+    heatmap = heatmap# [:20]
+    x = ["<BOS>"] + x + ["<EOS>"]
+    # y = y + ["<EOS>"]# [1:21]
+    df = pd.DataFrame(data=heatmap, columns=x, index=y)
+    sns.heatmap(df, cmap="Blues", annot=True, square=True)
+    plt.show()
 
-def save_model(model, path):
+
+def save_model(model, params, path):
     print("saved:", path)
     torch.save(
         model.state_dict(), path
     )
 
+def save_params(params, path):
+    output = ""
+    for (k, v) in params.items():
+        output += ",".join([str(k), str(v)]) + "\n"
+    with open(path, "w") as f:
+        f.write(output)
+    print("saved params:", path)
+
+def load_params(path):
+    params = dict()
+    with open(path, "r") as f:
+        csv = f.read()
+    for line in csv.strip().split("\n"):
+        k, v = line.strip().split(",")
+        try:
+            params[k] = int(v)
+        except:
+            params[k] = v
+    return params
 
 # 0.1以下 ほとんど役に立たない
 # 0.1~0.2 主旨を理解するのが困難である
@@ -67,41 +97,6 @@ def BLEU(n, refs, hyps):
         refs, hyps, weights# , smoothing_function=SmoothingFunction().method3
     )
     return bleu
-
-# NEタグの Entity.F1
-def EntityF1_netag(refs, hyps):
-    numerator = 0
-    denominator = 0
-    for ref, hyp in zip(refs, hyps):
-        numerator += len(set(ref) & set(hyp))
-        denominator += len(ref)
-    return  (100 * numerator / denominator)
-
-
-# micro average
-# NEタグの"値" のEntity.F1
-def EntityF1(data_manager):
-    numerator = 0
-    denominator = 0
-    for datum in data_manager:
-        numerator += sum(
-            [is_including(entity, datum.hyp) for entity in datum.entities]
-        )
-        denominator += len(datum.entities)
-    return (100 * numerator / denominator)
-
-
-# entity が文に含まれているかを判定
-def is_including(word, sent):
-    words = word.split(" ")
-    if len(words) == 1:
-        return len(set(words) & set(sent)) != 0
-    else:                       # word に半角スペースを含む場合
-        for idx in [i for i, x in enumerate(sent) if x == words[0]]:
-            if words == sent[idx: idx+len(words)]:
-                return True
-    return False
-
 
 def get_gpuinfo():
     querys = ["index", "name", "memory.free"]

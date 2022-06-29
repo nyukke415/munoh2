@@ -1,2 +1,6 @@
-data/*
+data
+girlschannel
+model
 bin/__pycache__/
+crawler*
+bin/pt2onnx.py

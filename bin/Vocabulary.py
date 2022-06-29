@@ -1,7 +1,6 @@
  # -*- coding: utf-8 -*-
-# last updated:<2022/05/05/Thu 11:44:08 from:tuttle-desktop>
+# last updated:<2022/06/14/Tue 15:26:20 from:tuttle-desktop>
 
-import re
 import os
 import collections
 
@@ -14,12 +13,9 @@ class Vocabulary():
         )
         self.i2w = {i: w for (w, i) in self.w2i.items()}
         self.c2w = {i: c for (c, i) in self.c2i.items()}
-        print("w2i:", len(self.w2i.keys()), "c2i:", len(self.c2i.keys()))
 
-    def make_vocabularies(self, txts, pre_txts):
-        print("making vocablary...")
-        max_vocab = 8000
-        min_freq = 2
+    def make_vocabularies(self, txts, pre_txts, min_freq=1):
+        print("making vocabulary...", flush=True)
         w2i = dict()
         w2i["<UNK>"] = 0
         w2i["<BOS>"] = 1
@@ -28,30 +24,33 @@ class Vocabulary():
 
         # add words using txt data ################
         words = list()
-        for txt in txts:
-            words += re.split(r" +", txt)
+        for txt in list(set(txts)):
+            words += txt.split()
         words = collections.Counter(utils.flatten(words))
         i = len(w2i.keys())
         for (w, freq) in words.most_common():
-            if freq < min_freq or i == max_vocab: # 頻度2以上の単語のみ登録
+            if freq < min_freq: # 頻度 min_freq 以上の単語のみ登録
                 break
+            if w in w2i.keys(): # 追加済みの単語は飛ばす
+                continue
             w2i[w] = i
             i += 1
-        print("words in txt", len(w2i.keys()))
+        print("words in train txt", len(w2i.keys()))
 
         # add words using pretrain data ################
         words = list()
-        for txt in pre_txts:
-            words += re.split(r" +", txt)
+        for txt in list(set(pre_txts)):
+            words += txt.split()
         words = collections.Counter(utils.flatten(words))
         i = len(w2i.keys())
         for (w, freq) in words.most_common():
-            if freq < min_freq or i == max_vocab: # 頻度2以上の単語のみ登録
+            if freq < min_freq: # 頻度 min_freq 以上の単語のみ登録
                 break
             if w in w2i.keys(): # txt で追加済みの単語は飛ばす
                 continue
             w2i[w] = i
             i += 1
+        print("words in train+pretrain txt", len(w2i.keys()))
 
         # character vocab ################
         chars = ""
@@ -60,12 +59,13 @@ class Vocabulary():
         chars = collections.Counter(list(set(list(chars))))
         c2i = dict()
         c2i["<UNK>"] = 0
-        c2i["<BOC>"] = 1
-        c2i["<EOC>"] = 2
+        c2i["<BOS>"] = 1
+        c2i["<EOS>"] = 2
         i = len(c2i.keys())
         for (c, freq) in chars.most_common():
             c2i[c] = i
             i += 1
 
-        print("DONE: make_vocabularies")
+        print("chars in train+pretrain txt", len(c2i.keys()))
+        print("DONE: make_vocabularies", flush=True)
         return w2i, c2i
