@@ -18,6 +18,7 @@ Supported language: Japanese, English
 
   https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html
   からダウンロードした movie_lines.txt を munoh2/data 配下に置いて、
+
   python bin/moviediag2conv.py
 
 - データセットの前処理，辞書の作成
